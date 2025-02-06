@@ -36,7 +36,7 @@ app.get("/listings", async ( req, res) => {
    // res.send("Hi , i am root");
    const allListings = await Listing.find({});
    res.render("listings/index.ejs", {allListings});
-  console.log(allListings);
+ // console.log(allListings);
 });
 
 
@@ -47,27 +47,93 @@ app.get("/listings", async ( req, res) => {
 
 
 //Show Route
+// app.get("/listings/:id", async (req, res) => {
+//     let { id } = req.params;
+//     const listing = await Listing.findById(id);
+//     res.render("listings/show.ejs", { listing });
+//   });
 app.get("/listings/:id", async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    res.render("listings/show.ejs", { listing });
-  });
+  let { id } = req.params;
+  const listing = await Listing.findById(id);
+  
+  // Ensure the price is formatted correctly
+  if (listing.price && !isNaN(listing.price)) {
+      listing.priceFormatted = listing.price.toLocaleString("en-IN");
+  } else {
+      listing.priceFormatted = "N/A";
+  }
 
-  // Create Route
-  app.post("/listings", async (req , res) => {
-    // let {title , description, image , price , country , location} = req.body;
-   // let listing = req.body.listing;
-   const newListing = new Listing(req.body.listing);
-   await newListing.save();
-   res.redirect("/listings");
-   // console.log(listing);
-  });
+  // Send the data to the template
+  res.render("listings/show.ejs", { listing });
+});
 
-// Edit Route
+
+
+  // // Create Route
+  // app.post("/listings", async (req , res) => {
+  //   // let {title , description, image , price , country , location} = req.body;
+  //  // let listing = req.body.listing;
+  //  const newListing = new Listing(req.body.listing);
+  //  await newListing.save();
+  //  res.redirect("/listings");
+  //  // console.log(listing);
+  // });
+
+//   app.post("/listings", async (req , res) => {
+//     console.log("Received Data:", req.body); // Debugging line
+//     const newListing = new Listing(req.body.listing);
+//     await newListing.save();
+//     res.redirect("/listings");
+// });
+
+// app.post("/listings", async (req, res) => {  // ✅ Mark function as async
+//   console.log("Received Data:", req.body); 
+
+//   // If image URL is an empty string, set it to undefined
+//   if (req.body.listing.image?.url?.trim() === "") {
+//       req.body.listing.image.url = undefined;
+//   }
+
+//   try {
+//       const newListing = new Listing(req.body.listing);
+//       await newListing.save();
+//       res.redirect("/listings");
+//   } catch (err) {
+//       console.error("Error saving listing:", err);
+//       res.status(500).send("Internal Server Error");
+//   }
+// });
+// app.post("/listings", async (req, res) => {
+//   try {
+//     const newListing = new Listing(req.body.listing);
+//     console.log("Processed Listing Before Save:", newListing); // Debugging log
+//     await newListing.save();
+//     res.status(201).send(newListing);
+//   } catch (error) {
+//     console.error("Error saving listing:", error);
+//     res.status(400).send(error);
+//   }
+// });
+
+app.post("/listings", async (req, res) => {
+  try {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    console.log("Listing saved successfully:", newListing);
+    res.redirect("/listings"); // 👈 Redirects to /listings after saving
+  } catch (err) {
+    console.error("Error saving listing:", err);
+    res.status(500).send("Error saving listing");
+  }
+});
+
+
+
+//Edit Route
 app.get("/listings/:id/edit", async (req, res) => {
     let { id } = req.params;
     const listing = await Listing.findById(id);
-    console.log(listing.image); 
+   // console.log(listing.image); 
     res.render("listings/edit.ejs", { listing });
 });
 
